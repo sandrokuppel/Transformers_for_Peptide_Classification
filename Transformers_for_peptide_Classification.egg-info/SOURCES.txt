@@ -1,0 +1,9 @@
+README.md
+setup.py
+Transformers_for_peptide_Classification/Transformer_Classes.py
+Transformers_for_peptide_Classification/__init__.py
+Transformers_for_peptide_Classification.egg-info/PKG-INFO
+Transformers_for_peptide_Classification.egg-info/SOURCES.txt
+Transformers_for_peptide_Classification.egg-info/dependency_links.txt
+Transformers_for_peptide_Classification.egg-info/requires.txt
+Transformers_for_peptide_Classification.egg-info/top_level.txt
