@@ -1,5 +1,5 @@
 # setup.py
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='Transformers_for_peptide_Classification',
