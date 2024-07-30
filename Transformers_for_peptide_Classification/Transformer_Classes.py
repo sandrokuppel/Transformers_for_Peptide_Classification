@@ -73,6 +73,7 @@ class TPrep(nn.Module):
 
     Takes input of shape (b, t, k0): (batch, sequence, input dimension)
     outputs CLS: classification token, token_embedding: embedded sequence (b,t,k), positional embedding: pe
+    If model is pretrained, the embeddings are frozen -> only CLS token is learned
 
     Parameters:
     ------------
@@ -87,6 +88,7 @@ class TPrep(nn.Module):
         self.k0 = hp["patch_size"]      #input dimension
         self.k = hp["dimension"]
         self.seq_length = hp["seq_length"]
+        Pretrained = hp["Pretraining"]
         self.learnable_emb = learnable_pos_emb
         self.cls_token = cls_token
 
@@ -98,6 +100,12 @@ class TPrep(nn.Module):
             self.pos_embedding = nn.Embedding(self.seq_length, self.k)    
         else: 
             self.pos_embedding = Positionalencoding(self.seq_length, self.k)  
+        
+        if Pretrained:
+            for param in self.pos_embedding.parameters():
+                param.requires_grad = False
+            for param in self.embed_tokens.parameters():
+                param.requires_grad = False
 
         self.layer_norm = nn.LayerNorm(self.k)
 

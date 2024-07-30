@@ -7,12 +7,19 @@ from .Transformer_Classes import ViTDecoder
 
 from .helper_functions import LinearWarmupScheduler
 from .helper_functions import Positionalencoding
+from .helper_functions import rename_keys
+from .helper_functions import prepend_prefix
+from .helper_functions import remove_prefix
+from .helper_functions import remove_keys
 
 from .MAE_Classes import MAE_MaskingRaw
 from .MAE_Classes import MAE_Decoder
+
 
 __all__ = [TBlock.__name__, TPrep.__name__,
            Encoder.__name__,MaskAlgorythmRaw.__name__,
            ClassifierCLS.__name__,
            MAE_MaskingRaw.__name__, MAE_Decoder.__name__,
-           LinearWarmupScheduler.__name__, Positionalencoding.__name__]
+           LinearWarmupScheduler.__name__, Positionalencoding.__name__,
+           rename_keys.__name__, prepend_prefix.__name__, 
+           remove_prefix.__name__, remove_keys.__name__]

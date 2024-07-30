@@ -51,3 +51,13 @@ class LinearWarmupScheduler(torch.optim.lr_scheduler._LRScheduler):
             return [self.init_lr + self.lr_gab_warmup * step / self.warmup_steps]
         else:
             return [self.max_lr - self.lr_gab_decay * (step - self.warmup_steps) / (self.total_steps - self.warmup_steps)]
+
+
+def rename_keys(state_dict, rename_func, prefix):
+    return {rename_func(prefix, key): value for key, value in state_dict.items()}
+def prepend_prefix(prefix,key):
+    return prefix + key
+def remove_prefix(prefix,key):
+    return key.replace(prefix, '', 1)
+def remove_keys(state_dict, keys_to_remove):
+    return {key: value for key, value in state_dict.items() if key not in keys_to_remove}
