@@ -61,3 +61,21 @@ def remove_prefix(prefix,key):
     return key.replace(prefix, '', 1)
 def remove_keys(state_dict, keys_to_remove):
     return {key: value for key, value in state_dict.items() if key not in keys_to_remove}
+
+
+# takes input of shape (1, w, h) and returns (1, t, patch_size**2) with t = w*h/patch_size**2
+def prepare_picture_no_batch(x, patch_size):
+    patches = x.unfold(1, patch_size, patch_size).unfold(2, patch_size, patch_size)
+    patches = patches.contiguous().view(patches.size(0), -1, patch_size * patch_size)
+    return patches
+
+def recreate_single_picture(patches, pic_height, pic_width, size):
+    patches_orig = patches.view(1, -1, size, size)
+    num_patches_height = pic_height // size
+    num_patches_width = pic_width // size
+    reconstructed = torch.zeros(pic_height,pic_width)
+    for i in range(num_patches_height):
+        for j in range(num_patches_width):
+            patch = patches_orig[:, i * num_patches_width + j]
+            reconstructed[i * size:(i + 1) * size, j * size:(j + 1) * size] = patch
+    return reconstructed

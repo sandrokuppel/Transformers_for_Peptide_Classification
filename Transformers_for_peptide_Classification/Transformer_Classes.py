@@ -85,7 +85,7 @@ class TPrep(nn.Module):
     """
     def __init__(self, hp, learnable_pos_emb=True, cls_token=True):
         super().__init__()
-        self.k0 = hp["patch_size"]      #input dimension
+        self.k0 = hp["input_dimension"]      #input dimension
         self.k = hp["dimension"]
         self.seq_length = hp["seq_length"]
         Pretrained = hp["Pretraining"]
@@ -251,3 +251,4 @@ class ViTDecoder(nn.Module):
         x = self.act_norm(x)
         x = self.pred(x)
         return x
+    
