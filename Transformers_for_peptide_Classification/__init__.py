@@ -4,6 +4,7 @@ from .Transformer_Classes import Encoder
 from .Transformer_Classes import MaskAlgorythmRaw
 from .Transformer_Classes import ClassifierCLS
 from .Transformer_Classes import ViTDecoder
+from .Transformer_Classes import SimpleClassifierCLS
 
 from .helper_functions import LinearWarmupScheduler
 from .helper_functions import Positionalencoding
@@ -23,7 +24,7 @@ __all__ = [TBlock.__name__, TPrep.__name__,
            Encoder.__name__,MaskAlgorythmRaw.__name__,
            ClassifierCLS.__name__, ViTDecoder.__name__,
            MAE_MaskingRaw.__name__, MAE_Decoder.__name__,
-           MAE_MaskingImage.__name__,
+           MAE_MaskingImage.__name__, SimpleClassifierCLS.__name__,
            LinearWarmupScheduler.__name__, Positionalencoding.__name__,
            prepare_picture_no_batch.__name__,
            rename_keys.__name__, prepend_prefix.__name__, 

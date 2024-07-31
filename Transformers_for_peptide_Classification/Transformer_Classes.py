@@ -223,6 +223,25 @@ class ClassifierCLS(nn.Module):
         output = self.linear2(x)
         return output
     
+class SimpleClassifierCLS(nn.Module):
+    """
+    Classifier for Classification token
+
+    Takes CLS as input and outputs tensor with size of number of classes
+    No softmax applied
+    """
+    def __init__(self, hp):
+        super().__init__()
+        self.k = hp["dimension"]
+        num_classes = hp["num_classes"]
+
+        self.linear1 = nn.Linear(self.k, int(self.k/2))
+        self.linear2 = nn.Linear(int(self.k/2), num_classes)
+    def forward(self, x):
+        x = self.linear1(x)
+        output = self.linear2(x)
+        return output
+    
 
 class ViTDecoder(nn.Module):
     """
