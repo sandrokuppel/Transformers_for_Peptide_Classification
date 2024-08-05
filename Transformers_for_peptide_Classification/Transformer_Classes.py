@@ -21,13 +21,13 @@ class TBlock(nn.Module):
     block_number : int
         block number of the transformer block (needed for getting attention weights)
     """
-    def __init__(self, hp, block_number = None):
+    def __init__(self, depth, dimension, heads, hidden_dim, dropout, block_number = None):
         super().__init__()
-        heads = hp["heads"]
-        k = hp["dimension"]
-        hidden_dim = hp["hidden_dim"]
-        dropout = hp["dropout"]
-        self.depth = hp['depth']
+        heads = heads
+        k = dimension
+        hidden_dim = hidden_dim
+        dropout = dropout
+        self.depth = depth
         self.block_number=block_number
 
         self.attention = nn.MultiheadAttention(k, heads, dropout=dropout, batch_first=True)
@@ -77,18 +77,25 @@ class TPrep(nn.Module):
 
     Parameters:
     ------------
-    hp: dict 
-        hyperparameters
-    learnable_pos_embedding: bool
-        True -> learned pos embedding
-        False -> pos encoding as in attention is all you need paper
+    input_dimension : int
+        dimension of input
+    dimension : int
+        dimension of embedding
+    sequence_length : int
+        length of sequence
+    Pretrained : bool
+        whether the model is pretrained or not -> if pretrained, embeddings are frozen
+    learnable_pos_emb : bool
+        whether the positional embedding is learnable or not
+    cls_token : bool
+        whether to use CLS token or not
     """
-    def __init__(self, hp, learnable_pos_emb=True, cls_token=True):
+    def __init__(self, input_dimension, dimension, sequence_length, Pretrained=False, learnable_pos_emb=True, cls_token=True):
         super().__init__()
-        self.k0 = hp["input_dimension"]      #input dimension
-        self.k = hp["dimension"]
-        self.seq_length = hp["seq_length"]
-        Pretrained = hp["Pretraining"]
+        self.k0 = input_dimension
+        self.k = dimension
+        self.seq_length = sequence_length
+        Pretrained = Pretrained
         self.learnable_emb = learnable_pos_emb
         self.cls_token = cls_token
 
@@ -121,6 +128,7 @@ class TPrep(nn.Module):
             pe_out = self.pos_embedding.weight
             pe = pe_out[None, :,:].expand(b,self.seq_length,self.k).to(x.device) # expand to create for every batch 
         else:
+            pe_out = self.pos_embedding()
             pe = self.pos_embedding()[None, :,:].expand(b,self.seq_length,self.k).to(x.device)
         token_embedding = self.layer_norm(token_embedding + pe)
         if self.cls_token:
@@ -147,12 +155,12 @@ class MaskAlgorythmRaw(nn.Module):
         self.P_m = hp_mask["P_m"]                           # probability of mask token
         self.P_r = hp_mask["P_r"]                           # probability of random token 
         self.P_e = hp_mask["P_e"]                           # probabilitz of equal token
-        self.Corruption_ratio = hp_mask["Corruption_ratio"] # ratio of corrupted tokens
+        self.Corruption_ratio = hp_mask["mask_ratio_raw"]   # ratio of corrupted tokens
         
-        self.k = hp["dimension"]
-        self.seq_length = hp["seq_length"]
+        self.k = hp["dimension_raw"]
+        self.seq_length = hp["seq_length_raw"]
         self.batch_size = hp["batch_size"]
-        self.patch_size = hp["patch_size"]
+        self.patch_size = hp["patch_size_raw"]
 
         self.num_mask = int(self.batch_size*self.P_m)       # number of mask pictures in one batch
         self.num_rand = int(self.batch_size*self.P_r)       # number of pictures with random tokens in one batch
@@ -193,15 +201,24 @@ class Encoder(nn.Module):
 
     Forward has the option to return the attention weights of the las transformer block
     """
-    def __init__(self,hp):
+    def __init__(self, depth, dimension, heads, hidden_dim, dropout):
         super().__init__()
-        self.depth = hp['depth']
-        self.tblocks= nn.ModuleList([TBlock(hp, block_number=i)  for i in range(self.depth)])
+        self.depth = depth
+        self.tblocks= nn.ModuleList([
+            TBlock(
+                depth=depth,
+                dimension=dimension,
+                heads=heads,
+                hidden_dim=hidden_dim,
+                dropout=dropout,
+                block_number=i
+            )  for i in range(self.depth)
+        ])
 
     def forward(self, x, len=None, get_weights=False):
         for i in range(self.depth):
-            output = self.tblocks[i](x, get_weights)
-        return output
+            x = self.tblocks[i](x, get_weights)
+        return x
 
 class ClassifierCLS(nn.Module):
     """
@@ -210,14 +227,12 @@ class ClassifierCLS(nn.Module):
     Takes CLS as input and outputs tensor with size of number of classes
     No softmax applied
     """
-    def __init__(self, hp):
+    def __init__(self, num_classes, dimension):
         super().__init__()
-        self.k = hp["dimension"]
-        num_classes = hp["num_classes"]
 
-        self.linear1 = nn.Linear(self.k, int(self.k/2))
+        self.linear1 = nn.Linear(dimension, int(dimension/2))
         self.GELU = nn.GELU()
-        self.linear2 = nn.Linear(int(self.k/2), num_classes)
+        self.linear2 = nn.Linear(int(dimension/2), num_classes)
     def forward(self, x):
         x = self.GELU(self.linear1(x))
         output = self.linear2(x)
@@ -230,10 +245,10 @@ class SimpleClassifierCLS(nn.Module):
     Takes CLS as input and outputs tensor with size of number of classes
     No softmax applied
     """
-    def __init__(self, hp):
+    def __init__(self, dimension, num_classes):
         super().__init__()
-        self.k = hp["dimension"]
-        num_classes = hp["num_classes"]
+        self.k = dimension
+        num_classes = num_classes
 
         self.linear1 = nn.Linear(self.k, int(self.k/2))
         self.linear2 = nn.Linear(int(self.k/2), num_classes)
