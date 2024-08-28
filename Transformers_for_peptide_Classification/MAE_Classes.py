@@ -322,8 +322,7 @@ class MAE_CalcLoss_Wavelets(nn.Module):
         return loss
     
 class MAE_CalcLoss_Raw(nn.Module):
-    """
-    Calculates loss for Masked Auto Encoder model
+    """Calculates loss for Masked Auto Encoder model
 
     - calculates loss between reconstructed sequence and original sequence
     - unscaled loss for masked tokens

@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from pytorch_lightning.callbacks import Callback
 
 # creates positional encodings for a sequence of length max_sequence_length and dimension d_model
 # positional encoding like in paper "Attention is all you need"
@@ -79,3 +80,21 @@ def recreate_single_picture(patches, pic_height, pic_width, size):
             patch = patches_orig[:, i * num_patches_width + j]
             reconstructed[i * size:(i + 1) * size, j * size:(j + 1) * size] = patch
     return reconstructed
+
+class UnusedParametersCallback(Callback):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        if batch_idx == 0:  # Check after the first training iteration
+            used_params = set()
+            for name, param in pl_module.named_parameters():
+                if param.grad is not None:
+                    used_params.add(name)
+            
+            all_params = set(name for name, _ in pl_module.named_parameters())
+            unused_params = all_params - used_params
+            
+            print("Unused parameters:")
+            for name in unused_params:
+                print(f"   {name}")
+            
+            # Remove this callback after the first iteration
+            trainer.callbacks = [cb for cb in trainer.callbacks if not isinstance(cb, UnusedParametersCallback)]

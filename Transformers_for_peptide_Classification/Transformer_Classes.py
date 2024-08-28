@@ -2,26 +2,25 @@ import torch
 from torch import nn
 import numpy as np
 from .helper_functions import Positionalencoding
+from torch import nn
 
 class TBlock(nn.Module):
-    """
-    Transformer Block Class
-    
-    This is the main building block of the transformer model. 
-    -> multihead attention
-    -> layer normalization
-    -> feedforward neural network
-    -> layer normalization 
-    Has the option to return attention weights
-    
-    Parameters:
-    ------------
-    hp : dict
-        hyperparameters of the model
-    block_number : int
-        block number of the transformer block (needed for getting attention weights)
-    """
     def __init__(self, depth, dimension, heads, hidden_dim, dropout, block_number = None):
+        """Transformer Block Class
+        
+        Description
+        ------------
+        Transformer block for the encoder part of the transformer.
+        Consists of multihead attention and feedforward layer.
+        
+        Parameters
+        ------------
+        hp : dict
+            hyperparameters of the model
+        block_number : int
+            block number of the transformer block (needed for getting attention weights)
+            
+        """
         super().__init__()
         heads = heads
         k = dimension
@@ -47,7 +46,7 @@ class TBlock(nn.Module):
         """
         Forward pass of the transformer block
         
-        Parameters:
+        Parameters
         ------------
         x : torch.Tensor
             input tensor
@@ -68,34 +67,30 @@ class TBlock(nn.Module):
         return self.norm2(feedforward + x)
     
 class TPrep(nn.Module):
-    """
-    Transformer prepare embeddings class
+    def __init__(self, input_dimension: int, dimension: int, sequence_length: int, Pretrained: bool = False, learnable_pos_emb: bool = True, cls_token: bool = True) ->None:
+        """TPrep Class
 
-    Takes input of shape (b, t, k0): (batch, sequence, input dimension)
-    outputs CLS: classification token, token_embedding: embedded sequence (b,t,k), positional embedding: pe
-    If model is pretrained, the embeddings are frozen -> only CLS token is learned
-
-    Parameters:
-    ------------
-    input_dimension : int
-        dimension of input
-    dimension : int
-        dimension of embedding
-    sequence_length : int
-        length of sequence
-    Pretrained : bool
-        whether the model is pretrained or not -> if pretrained, embeddings are frozen
-    learnable_pos_emb : bool
-        whether the positional embedding is learnable or not
-    cls_token : bool
-        whether to use CLS token or not
-    """
-    def __init__(self, input_dimension, dimension, sequence_length, Pretrained=False, learnable_pos_emb=True, cls_token=True):
+        Parameters
+        ------------
+        input_dimension : int
+            dimension of the input tokens
+        dimension : int
+            dimension of the token embeddings
+        sequence_length : int
+            length of the input sequence
+        Pretrained : bool, optional
+            whether to use pretrained embeddings and positional encodings, by default False
+        learnable_pos_emb : bool, optional
+            whether to use learnable positional embeddings, by default True
+        cls_token : bool, optional
+            whether to include a CLS token in the input, by default True
+            
+        """
         super().__init__()
         self.k0 = input_dimension
         self.k = dimension
         self.seq_length = sequence_length
-        Pretrained = Pretrained
+        self.Pretrained = Pretrained
         self.learnable_emb = learnable_pos_emb
         self.cls_token = cls_token
 
@@ -194,14 +189,14 @@ class MaskAlgorythmRaw(nn.Module):
 
 
 class Encoder(nn.Module):
-    """
-    Encoder of Transformer
+    def __init__(self, depth, dimension, heads, hidden_dim, dropout)->None:
+        """
+        Encoder of Transformer
 
-    Puts together the Tranformer blocks for the encoding
+        Puts together the Tranformer blocks for the encoding
 
-    Forward has the option to return the attention weights of the las transformer block
-    """
-    def __init__(self, depth, dimension, heads, hidden_dim, dropout):
+        Forward has the option to return the attention weights of the las transformer block
+        """
         super().__init__()
         self.depth = depth
         self.tblocks= nn.ModuleList([
@@ -221,13 +216,15 @@ class Encoder(nn.Module):
         return x
 
 class ClassifierCLS(nn.Module):
-    """
-    Classifier for Classification token
-
-    Takes CLS as input and outputs tensor with size of number of classes
-    No softmax applied
-    """
     def __init__(self, num_classes, dimension):
+        """
+        Classifier for Classification token
+
+        Description
+        ------------
+        Takes CLS as input and outputs tensor with size of number of classes
+        No softmax applied
+        """
         super().__init__()
 
         self.linear1 = nn.Linear(dimension, int(dimension/2))
@@ -239,13 +236,15 @@ class ClassifierCLS(nn.Module):
         return output
     
 class SimpleClassifierCLS(nn.Module):
-    """
-    Classifier for Classification token
-
-    Takes CLS as input and outputs tensor with size of number of classes
-    No softmax applied
-    """
     def __init__(self, dimension, num_classes):
+        """
+        Classifier for Classification token
+
+        Description
+        ------------
+        Takes CLS as input and outputs tensor with size of number of classes
+        No softmax applied
+        """
         super().__init__()
         self.k = dimension
         num_classes = num_classes
