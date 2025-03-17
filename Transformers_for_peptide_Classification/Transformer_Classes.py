@@ -58,13 +58,17 @@ class TBlock(nn.Module):
         torch.Tensor
             output tensor of the transformer block or attention weights
         """
-        attended, weights = self.attention(x, x, x, need_weights=True,  average_attn_weights = False)
-        if get_weights and self.block_number == self.depth-1:
-            return weights
+        if get_weights:
+            attended, weights = self.attention(x, x, x, need_weights=True,  average_attn_weights = False)
+        else:
+            attended, _ = self.attention(x, x, x, need_weights=False)
         attended = self.dropout1(attended)
         x = self.norm1(attended + x)
         feedforward = self.dropout2(self.ff(x))
-        return self.norm2(feedforward + x)
+        if get_weights:
+            return self.norm2(feedforward + x), weights
+        else:
+            return self.norm2(feedforward + x)
     
 class TPrep(nn.Module):
     def __init__(self, input_dimension: int, dimension: int, sequence_length: int, Pretrained: bool = False, learnable_pos_emb: bool = True, cls_token: bool = True) ->None:
@@ -111,17 +115,22 @@ class TPrep(nn.Module):
 
         self.layer_norm = nn.LayerNorm(self.k)
 
-    def forward(self, x):
+    def forward(self, x, production_mode=False):
         b, t, k0 = x.size()
         assert (k0 == self.k0), 'dimension does not match'
-        assert (t == self.seq_length),   'sequence length does not match'
+        if production_mode == False:
+            assert (t == self.seq_length),   'sequence length does not match'
         token_embedding = self.embed_tokens(x)                               # go to dimension k
         if self.cls_token:
             CLS = torch.tensor([1.],requires_grad=True).to(x.device)             # CLS token in shape (1,1
             CLS = self.CLS(CLS)[None, :].expand(b,self.k)[:,None,:].to(x.device)     #CLS token in shape (b,1,k)
         if self.learnable_emb:
-            pe_out = self.pos_embedding.weight
-            pe = pe_out[None, :,:].expand(b,self.seq_length,self.k).to(x.device) # expand to create for every batch 
+            if production_mode:
+                pe_out = self.pos_embedding.weight[:t,...]
+                pe = pe_out[None, :,:].expand(b,t,self.k).to(x.device) # expand to create for every batch
+            else: 
+                pe_out = self.pos_embedding.weight
+                pe = pe_out[None, :,:].expand(b,self.seq_length,self.k).to(x.device) # expand to create for every batch 
         else:
             pe_out = self.pos_embedding()
             pe = self.pos_embedding()[None, :,:].expand(b,self.seq_length,self.k).to(x.device)
@@ -211,9 +220,16 @@ class Encoder(nn.Module):
         ])
 
     def forward(self, x, len=None, get_weights=False):
-        for i in range(self.depth):
-            x = self.tblocks[i](x, get_weights)
-        return x
+        if get_weights:
+            weights = []
+            for i in range(self.depth):
+                x, w = self.tblocks[i](x, get_weights)
+                weights.append(w[:,None,...])
+            return x, torch.cat(weights, dim=1)
+        else:
+            for i in range(self.depth):
+                x = self.tblocks[i](x, get_weights)
+            return x
 
 class ClassifierCLS(nn.Module):
     def __init__(self, num_classes, dimension):
