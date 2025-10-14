@@ -54,6 +54,7 @@ This model builds on prior research conducted at the Institute for Computational
 
 ## Architecture
 
+![Model Architecture](images/Multi-Modal-Architecture.png)
 
 
 
