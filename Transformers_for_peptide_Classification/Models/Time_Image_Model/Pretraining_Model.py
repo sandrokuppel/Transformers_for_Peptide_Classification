@@ -15,7 +15,7 @@ from Transformers_for_peptide_Classification.Core import (
     MAE_CalcLoss_Raw
 )
 
-class MAE_MultiModal_WaveletsRaw_Pretraining(pl.LightningModule):
+class MultiModal_TimeSeriesImage_Pretraining(pl.LightningModule):
     def __init__(self, hp, hp_lr, hp_mask):
         super().__init__()
         self.save_hyperparameters()

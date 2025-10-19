@@ -11,7 +11,7 @@ from Transformers_for_peptide_Classification.Core import (
     ClassifierCLS
 )
 
-class MAE_MultiModal_WaveletsRaw_Classification(pl.LightningModule):
+class MultiModal_TimeSeriesImage_Classification(pl.LightningModule):
     def __init__(self, hp, hp_lr, model_name, encoder=None, PrepPatches_raw=None, PrepPatches_image=None):
         super().__init__()
         self.save_hyperparameters()
