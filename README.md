@@ -76,4 +76,14 @@ This model builds on prior research conducted at the [Institute for Computationa
 > **Note:** This architecture is inspired by [CrossViT](https://arxiv.org/abs/2103.14899), adapted for multi-modal inputs including time series, images, and feature vectors.
 
 
+##  Open Problems and Possible Improvements
+
+- **Descriptor Feed-Forward:** Currently hardcoded; should be refactored into a flexible module or configurable entry.  
+- **Model Modularity:** Each model variant (e.g., multi-modal, image-only, time-series-only) should be implemented as a separate `nn.Module` to allow seamless integration into any `LightningModule`.  
+- **Missing Implementations:** Some models are not yet included:  
+  - Time Series Transformer  
+  - Vision Transformer (ViT)  
+  - Multi-modal model combining **time series** and **images**  
+  - Multi-modal model combining **time series** and a **feature vector**  
+
 
