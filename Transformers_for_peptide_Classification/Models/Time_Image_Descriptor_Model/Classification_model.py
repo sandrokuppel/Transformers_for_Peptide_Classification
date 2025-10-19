@@ -5,7 +5,7 @@ import seaborn as sns
 import torch
 import torchmetrics
 from torch import nn
-from Transformers_for_peptide_Classification import (
+from Transformers_for_peptide_Classification.Core import (
     TPrep,
     CrossViT_Encoder,
     ClassifierCLS,
@@ -13,7 +13,7 @@ from Transformers_for_peptide_Classification import (
 )
 
 
-class MAE_MultiModal_WaveletsRaw_Classification(pl.LightningModule):
+class MultiModal_TimeSeriesImageDescriptor_Classifier(pl.LightningModule):
     def __init__(
         self,
         hp,

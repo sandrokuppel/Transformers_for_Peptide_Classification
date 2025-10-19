@@ -1,5 +1,7 @@
 import torch
-from .Pretraining_Model import MAE_MultiModal_WaveletsRaw_Pretraining
+from Transformers_for_peptide_Classification.Models.Time_Image_Descriptor_Model import (
+    MultiModal_TimeSeriesImageDescriptor_Pretraining,
+)
 
 # Set device cuda for GPU if it's available otherwise run on the CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -64,7 +66,7 @@ hp_mask = {
 }
 
 # Initialize model
-model = MAE_MultiModal_WaveletsRaw_Pretraining(hp, hp_lr, hp_mask).to(device)
+model = MultiModal_TimeSeriesImageDescriptor_Pretraining(hp, hp_lr, hp_mask).to(device)
 
 '''
 - Write your own dataloader specific to your dataset 

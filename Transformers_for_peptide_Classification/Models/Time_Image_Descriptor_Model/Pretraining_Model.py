@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 import torch
 from torch import nn
-from Transformers_for_peptide_Classification import (
+from Transformers_for_peptide_Classification.Core import (
     TPrep, 
     CrossViT_Encoder,
     MAE_MaskingImage, 
@@ -17,7 +17,7 @@ from Transformers_for_peptide_Classification import (
 )
 
 
-class MAE_MultiModal_WaveletsRaw_Pretraining(pl.LightningModule):
+class MultiModal_TimeSeriesImageDescriptor_Pretraining(pl.LightningModule):
     def __init__(self, hp, hp_lr, hp_mask):
         super().__init__()
         self.save_hyperparameters()

@@ -1,12 +1,14 @@
 import torch
-from Transformers_for_peptide_Classification import (
+from Transformers_for_peptide_Classification.Core import (
     TPrep,
     CrossViT_Encoder,
     CrossAttention,
     rename_keys,
     remove_prefix,
 )
-from .Classification_model import MAE_MultiModal_WaveletsRaw_Classification
+from Transformers_for_peptide_Classification.Models.Time_Image_Descriptor_Model import (
+    MultiModal_TimeSeriesImageDescriptor_Classifier,
+)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -137,7 +139,7 @@ fc1.load_state_dict(fc1_state_dict)
 fc2.load_state_dict(fc2_state_dict)
 
 # Initialize model
-model = MAE_MultiModal_WaveletsRaw_Classification(
+model = MultiModal_TimeSeriesImageDescriptor_Classifier(
     hp,
     hp_lr,
     model_name="Example_Classification_Model",

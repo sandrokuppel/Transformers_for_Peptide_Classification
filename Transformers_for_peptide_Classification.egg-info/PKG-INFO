@@ -1,7 +1,0 @@
-Metadata-Version: 2.1
-Name: Transformers_for_peptide_Classification
-Version: 0.1.0
-Summary: A package for peptide classification using transformers
-Author: Sandro Kuppel
-Requires-Dist: torch
-Requires-Dist: numpy

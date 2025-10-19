@@ -1,1 +1,2 @@
-Transformers_for_peptide_Classification/__pycache__/
+__pycache__/
+*.egg-info/
